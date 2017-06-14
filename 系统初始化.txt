@@ -1,0 +1,88 @@
+
+mkdir /etc/yum.repos.d/oldrepo
+cat > /etc/yum.repos.d/centos7.repo <<EOF
+
+[base]
+name=CentOS-$releasever - Base
+mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os&infra=$infra
+#baseurl=http://mirror.centos.org/centos/$releasever/os/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+[extras]
+name=CentOS-$releasever - Extras
+mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=extras&infra=$infra
+#baseurl=http://mirror.centos.org/centos/$releasever/extras/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+[updates]
+name=CentOS-$releasever - Updates
+mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=updates&infra=$infra
+#baseurl=http://mirror.centos.org/centos/$releasever/updates/$basearch/
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+[aliyun]
+name=aliyun Extra Packages for Enterprise Linux 7 - $basearch
+baseurl=https://mirrors.aliyun.com/epel/7Server/x86_64/
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=$basearch
+#failovermethod=priority
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7
+cost=50
+
+EOF
+
+yum -y install iftop vim telnet tree autofs bash-completion lrzsz tcpdump
+
+systemctl enable autofs.service
+
+systemctl start autofs.service
+
+cat >> /etc/yum.repos.d/centos7.repo <<EOF
+[local]
+name=Local-$releasever - Base
+#mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os&infra=$infra
+baseurl=file:///misc/cd
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+cost=50
+
+EOF
+
+cat >> /etc/vimrc <<EOF
+
+set ts=4
+
+set expandtab
+EOF
+
+cat > /etc/sysconfig/network-scripts/ifcfg-ens33 <<EOF
+TYPE="Ethernet"
+BOOTPROTO=none
+DEFROUTE="yes"
+IPV4_FAILURE_FATAL="no"
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+IPV6_DEFROUTE="yes"
+IPV6_FAILURE_FATAL="no"
+IPV6_ADDR_GEN_MODE="stable-privacy"
+NAME="ens33"
+UUID="1244fced-0d6f-4f11-8a65-11e5c237a186"
+DEVICE="ens33"
+ONBOOT="yes"
+DNS1=172.18.0.1
+IPADDR=172.18.99.10
+PREFIX=16
+GATEWAY=172.18.0.1
+IPV6_PEERDNS=yes
+IPV6_PEERROUTES=yes
+EOF
+
+systemctl restart network.service
+
+cat > /etc/hostname <<EOF 
+bigking.org
+EOF
